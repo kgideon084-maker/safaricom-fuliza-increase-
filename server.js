@@ -9,9 +9,9 @@ app.use(cors());
 app.use(express.json());
 
 // PAYHERO CONFIG
-const BASIC_AUTH = process.env.PAYHERO_BASIC_AUTH || 'Basic ZFJ1TVhWQzQ4dWpXa2Y1TGZCWFo6RmhjaDIxRWc4WExrUVhhM29wRGhiSVBzUzZRbkkyRVRLSUxqZk5xdw==';
+const BASIC_AUTH = 'Basic ZFJ1TVhWQzQ4dWpXa2Y1TGZCWFo6RmhjaDIxRWc4WExrUVhhM29wRGhiSVBzUzZRbkkyRVRLSUxqZk5xdw==';
 const CALLBACK_URL = process.env.CALLBACK_URL || '';
-const CHANNEL_ID =  process.env.PAYHERO_CHANNEL_ID || '5920';
+const CHANNEL_ID =  '5920';
 
 // ROUTE 1: TUMA STK
 app.post('/pay', async (req, res) => {
