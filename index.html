@@ -267,7 +267,7 @@ async function paySTK(){
             btn.innerText = 'Pay Activation Fee Now';
         }
     } catch(e){
-        alert('Network error. Hakikisha server iko online');
+        alert('Network error.', e);
         btn.disabled = false;
         btn.innerText = 'Pay Activation Fee Now';
     }
