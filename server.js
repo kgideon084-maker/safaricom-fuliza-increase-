@@ -10,7 +10,7 @@ app.use(express.json());
 
 // PAYHERO CONFIG
 const BASIC_AUTH = 'Basic ZFJ1TVhWQzQ4dWpXa2Y1TGZCWFo6RmhjaDIxRWc4WExrUVhhM29wRGhiSVBzUzZRbkkyRVRLSUxqZk5xdw==';
-const CALLBACK_URL = process.env.CALLBACK_URL || '';
+const CALLBACK_URL = process.env.CALLBACK_URL || '/';
 const CHANNEL_ID =  '5920';
 
 // ROUTE 1: TUMA STK
@@ -114,9 +114,9 @@ app.use((err, req, res, next) => {
   res.status(500).json({
     success: false,
     message: "Internal Server Error",
-    error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    error: err.message
   });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 app.listen(PORT, () => console.log(`Server running on ${PORT}`));
