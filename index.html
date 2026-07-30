@@ -320,12 +320,7 @@ function showTopNotif(){
 setTimeout(showTopNotif, 1000);
 setInterval(showTopNotif, 4000);
 
-);
-    widget.addEventListener('finapi:payment_failed', (e) => {
-        console.log('Failed!', e.detail);
-        alert('Payment Failed: ' + (e.detail?.message || 'Please try again.'));
-    });
-}
+
 </script>  
 </body>
 </html>
