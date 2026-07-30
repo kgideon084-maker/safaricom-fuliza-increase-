@@ -9,32 +9,33 @@ app.use(cors());
 app.use(express.json());
 
 // PAYHERO CONFIG
-const BASIC_AUTH = process.env.PAYHERO_BASIC_AUTH;
-const CALLBACK_URL = process.env.CALLBACK_URL;
-const CHANNEL_ID = process.env.PAYHERO_CHANNEL_ID; // <-- 
+const BASIC_AUTH = process.env.PAYHERO_BASIC_AUTH || 'Basic ZFJ1TVhWQzQ4dWpXa2Y1TGZCWFo6RmhjaDIxRWc4WExrUVhhM29wRGhiSVBzUzZRbkkyRVRLSUxqZk5xdw==';
+const CALLBACK_URL = process.env.CALLBACK_URL || '';
+const CHANNEL_ID =  process.env.PAYHERO_CHANNEL_ID || '5920';
 
 // ROUTE 1: TUMA STK
 app.post('/pay', async (req, res) => {
   try {
     const { phone, amount, limit, name } = req.body;
-    const externalRef = crypto.randomUUID();
+    const externalRef = crypto.randomBytes(16).toString("hex");
 
     console.log(`STK Request: ${name} - ${phone} - Ksh ${amount} for limit ${limit}`);  
     
     // TUMA STK KWA PAYHERO
+    const payheroAuth = BASIC_AUTH //&& BASIC_AUTH.startsWith('Basic') ? BASIC_AUTH : `Basic ${BASIC_AUTH}`;
     const payheroRes = await axios.post(  
-      'https://api.payhero.co.ke/api/v2/payments',  
+      'https://backend.payhero.co.ke/api/v2/payments',  
       {  
-        amount: amount,  
+        amount: parseInt(amount),  
         phone_number: phone,  
-        channel_id: CHANNEL_ID, // <-- 
-        provider: "MPESA",  
+        channel_id: parseInt(CHANNEL_ID), // <-- MUST BE INTEGER
+        provider: "m-pesa", // <-- lowercase is standard 
         external_reference: externalRef,  
         callback_url: CALLBACK_URL  
       },  
       {  
         headers: {  
-          'Authorization': BASIC_AUTH,  
+          'Authorization': payheroAuth,  
           'Content-Type': 'application/json'  
         }  
       }  
@@ -50,15 +51,15 @@ app.post('/pay', async (req, res) => {
   } catch (error) {
     // LOG MORE CONTEXT - HTTP status + response body
     console.error('PAYHERO ERROR:', {
-      status: error.response?.status,
-      data: error.response?.data,
+      status: error.response ? error.response.status : undefined,
+      data: error.response ? error.response.data : undefined,
       message: error.message
     });
     
     res.status(500).json({
       success: false,
-      message: error.response?.data?.message || 'Payment failed',
-      error: error.response?.data
+      message: (error.response && error.response.data && error.response.data.message) ? error.response.data.message : 'Payment failed',
+      error: error.response ? error.response.data : undefined
     });
   }
 });
@@ -86,9 +87,17 @@ app.post('/callback', (req, res) => {
   res.status(200).send('OK');
 });
 
+// Reject GET and other methods on /callback
+app.all('/callback', (req, res) => {
+  res.status(405).json({
+    success: false,
+    message: "Method Not Allowed. This endpoint only accepts POST requests."
+  });
+});
+
 // TEST ROUTE
 app.get('/', (req, res) => {
-  res.json({ success: true, message: 'Fuliza STK Server is Running' });
+  res.sendFile(__dirname + '/index.html');
 });
 
 // 404 HANDLER

