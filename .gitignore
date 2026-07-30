@@ -9,3 +9,7 @@ npm-debug.log*
 # OS
 .DS_Store
 Thumbs.db
+
+# Original files
+index.source.html
+server.source.js
